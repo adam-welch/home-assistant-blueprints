@@ -1,0 +1,46 @@
+blueprint:
+  name: Aqara Mini Switch
+  description: |
+   Aqara Mini Switch actions, single, double and hold
+  domain: automation
+  input:
+    action_sensor:
+      name: Action Sensor
+      description: Zigbee2mqtt action sensor
+      selector:
+        entity:
+          integration: mqtt
+          domain: sensor
+    single_action:
+      name: Single Click
+      description: Single click for devices with one button
+      default: []
+      selector:
+        action: {}
+    double_action:
+      name: Double Click
+      description: Double click for devices with one button
+      default: []
+      selector:
+        action: {}          
+    hold_action:
+      name: Hold Action
+      description: Hold action for devices with one button
+      default: []
+      selector:
+        action: {}                   
+mode: parallel
+max_exceeded: silent
+trigger:
+  platform: state
+  entity_id: !input 'action_sensor'
+action:
+- variables:
+    command: '{{ trigger.to_state.attributes.action if trigger.to_state.state == "" else trigger.to_state.state }}'
+- choose:
+  - conditions: '{{ command == ''single'' }}'
+    sequence: !input 'single_action'
+  - conditions: '{{ command == ''double'' }}'
+    sequence: !input 'double_action'
+  - conditions: '{{ command == ''hold'' }}'
+    sequence: !input 'hold_action'
